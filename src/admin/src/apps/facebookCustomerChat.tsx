@@ -37,6 +37,12 @@ export const App: FC = () => {
       .catch(console.error)
 
   const updateSettings = () => {
+    // NEW: Basic validation for pageID (alphanumeric, 15-32 chars)
+    if (pageID && !/^[a-zA-Z0-9]{15,32}$/.test(pageID)) {
+      alert("Page ID must be 15-32 alphanumeric chars")  // Simple UX feedback
+      return
+    }
+
     const htmlCode =
       pageID?.length > 0
         ? chatCode
@@ -52,6 +58,8 @@ export const App: FC = () => {
       place: "body_end",
       value: htmlCode,
     })
+    // NEW: Log update for debug
+    console.log("Updated FB Chat settings:", { pageID, minimized, codeLength: htmlCode.length })
   }
 
   useEffect(() => {

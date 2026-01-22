@@ -46,6 +46,12 @@ export const App: FC = () => {
       .catch(console.error)
 
   const updateSettings = () => {
+    // NEW: Validate GA ID (UA-/G- prefix, digits)
+    if (trackingID && !/^UA-\d+-\d+$|^G-\w+$/.test(trackingID)) {
+      alert("Tracking ID must be UA-XXXXX-X or G-XXXXX")
+      return
+    }
+
     const gtag =
       trackingID?.length > 0
         ? gtagCode.replace(/GA_TRACKING_ID/g, trackingID)
@@ -58,6 +64,8 @@ export const App: FC = () => {
       place: "head_start",
       value: gtag,
     })
+    // NEW: Log save
+    console.log("Saved GA Tracking ID:", trackingID, "Code len:", gtag.length)
   }
 
   useEffect(() => {

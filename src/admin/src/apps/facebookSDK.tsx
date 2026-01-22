@@ -49,10 +49,18 @@ export const App: FC = () => {
         const appSettings = json
         setAppID(appSettings?.appId)
         setLocale(appSettings?.locale)
+        // NEW: Log fetch for debug
+        console.log("Fetched FB SDK settings:", { appID: appSettings?.appId, locale: appSettings?.locale })
       })
       .catch(console.error)
 
   const updateSettings = () => {
+    // NEW: Validate locale (e.g., en_US format)
+    if (locale && !/^[a-z]{2}_[A-Z]{2}$/.test(locale)) {
+      alert("Locale must be like 'en_US'")
+      return
+    }
+
     const htmlCode =
       appID?.length > 0
         ? facebookCode
@@ -65,6 +73,8 @@ export const App: FC = () => {
       place: "body_start",
       value: htmlCode,
     })
+    // NEW: Log update
+    console.log("Updated FB SDK:", { appID, locale, codeLength: htmlCode.length })
   }
 
   useEffect(() => {
