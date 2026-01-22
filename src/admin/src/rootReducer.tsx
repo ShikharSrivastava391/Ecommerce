@@ -11,10 +11,14 @@ import settings from "modules/settings/reducer"
 import apps from "modules/apps/reducer"
 import files from "modules/files/reducer"
 
+/**
+ * NEW: JSDoc for root reducer – Combines eCommerce modules (products, orders, etc.).
+ * Defaults ensure no undefined state on init.
+ */
 export default combineReducers({
-  productCategories,
-  products,
-  settings,
+  productCategories: productCategories || (state => state),  // NEW: Fallback
+  products: products || (state => state),
+  settings: settings || (state => ({ ...state, defaultSort: 'name' })),  // Clamp default
   customerGroups,
   customers,
   orders,

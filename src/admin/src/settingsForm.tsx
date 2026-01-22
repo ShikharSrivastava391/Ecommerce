@@ -1,13 +1,20 @@
 import { Button, MenuItem } from "@mui/material"
 import { forOwn } from "lodash"
-import { Select, Switches, TextField } from "mui-rff"
+import { Select, Switches, TextField, Form } from "mui-rff"  // NEW: Import Form if needed
 import React from "react"
-import { Form } from "react-final-form"
+import { Form as FinalForm } from "react-final-form"  // Clarify import
 
 export const SettingsForm = () => (
-  <Form
+  <FinalForm
     onSubmit={values => {
+      // NEW: Basic val before save (e.g., apiBaseUrl format)
+      if (!values.apiBaseUrl || !values.apiBaseUrl.startsWith('http')) {
+        alert('API Base URL must start with http:// or https://')  // Simple UX
+        return
+      }
       forOwn(values, (value, key) => localStorage.setItem(key, value))
+      // NEW: Log submit for debug
+      console.log('Settings saved:', { language: values.language, developerMode: values.developerMode })
       window.location.reload()
     }}
     initialValues={{
@@ -18,7 +25,7 @@ export const SettingsForm = () => (
     }}
   >
     {({ handleSubmit, form: { reset }, submitting, pristine, values }) => (
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} aria-label="Settings Form">  // NEW: Aria for accessibility
         <Select
           name="language"
           label="Language"
@@ -41,6 +48,7 @@ export const SettingsForm = () => (
           label="API Base URL"
           placeholder="http://yourDomain/api/v1"
           required
+          helperText="Must start with http://"  // NEW: Helper
         />
         <TextField
           name="apiWebSocketUrl"
@@ -65,8 +73,8 @@ export const SettingsForm = () => (
             Reset
           </Button>
         </div>
-        <pre>{JSON.stringify(values, null, 2)}</pre>
+        <pre aria-label="Current Values">{JSON.stringify(values, null, 2)}</pre>
       </form>
     )}
-  </Form>
+  </FinalForm>
 )
