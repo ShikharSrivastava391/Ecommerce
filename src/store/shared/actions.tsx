@@ -18,6 +18,8 @@ export const fetchProducts = () => async (dispatch, getState) => {
   const products = response.json
   dispatch(receiveProducts(null))
   dispatch(receiveProducts(products))
+  // NEW: Log fetch for debug (no sensitive)
+  console.log('Fetched products:', { count: products?.length || 0, filterKeys: Object.keys(filter) })
 }
 
 export const getProductFilterForCategory = (locationSearch, sortBy) => {
@@ -67,6 +69,11 @@ export const getParsedProductFilter = productFilter => {
     },
     productFilter.attributes
   )
+
+  // NEW: Validate numeric fields (clamp negatives)
+  filter.price_from = Math.max(filter.price_from || 0, 0)
+  filter.price_to = Math.max(filter.price_to || 0, 0)
+  filter.limit = Math.max(filter.limit || 0, 1)
 
   return filter
 }
