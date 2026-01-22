@@ -62,3 +62,8 @@ export const SET_PRODUCTS_FILTER = "SET_PRODUCTS_FILTER"
 
 export const LOCATION_CHANGED = "LOCATION_CHANGED"
 export const CUSTOMER_RECEIVE = "CUSTOMER_RECEIVE"
+
+/**
+ * NEW: JSDoc for action types – Defines Redux actions for products, cart, checkout, etc.
+ * Use for dispatching state changes in eCommerce flows.
+ */

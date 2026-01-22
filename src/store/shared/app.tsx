@@ -27,6 +27,7 @@ interface Props {
 const SwitchContainers: FC<Props> = props => {
   const location = useLocation()
   const [prevLocation, setPrevLocation] = useState(location)
+  const [error, setError] = useState<Error | null>(null)  // NEW: Error state
 
   const { currentPage, setCurrentPageDispatch } = props
 
@@ -47,6 +48,12 @@ const SwitchContainers: FC<Props> = props => {
     },
   ]
 
+  // NEW: Error boundary catch
+  if (error) {
+    console.error('SwitchContainers error:', error)  // Log error
+    return <div role="alert" aria-label="Route error occurred">Error: {error.message}. Please refresh.</div>
+  }
+
   useEffect(() => {
     setCurrentPageDispatch(location)
 
@@ -54,6 +61,9 @@ const SwitchContainers: FC<Props> = props => {
       const pathnameChanged = location.pathname !== prevLocation.pathname
       const queryChanged = location.search !== prevLocation.search
       const isSearchPage = location.pathname === "/search"
+
+      // NEW: Log route change
+      console.log('Route changed:', { from: prevLocation.pathname, to: location.pathname })
 
       if (pathnameChanged || (queryChanged && isSearchPage))
         animateScroll.scrollToTop({
