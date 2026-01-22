@@ -38,12 +38,17 @@ import WebStoreServices from "./webstore/services"
 import WebStoreClient from "./webstoreClient"
 
 export const Client = (options: Options) => {
+  // NEW: Basic prop validation (prevent undefined baseUrl)
   const {
     apiBaseUrl = "/api/v1",
     apiToken,
     ajaxBaseUrl = "/ajax",
     webstoreToken,
-  } = options
+  } = options || {}  // Fallback to empty if options null
+  if (!apiBaseUrl || typeof apiBaseUrl !== 'string') {
+    console.warn('Invalid apiBaseUrl in Client options')
+    apiBaseUrl = '/api/v1'  // Clamp default
+  }
 
   const apiClient = ApiClient({
     baseUrl: apiBaseUrl,
@@ -101,6 +106,9 @@ export const Client = (options: Options) => {
     },
   }
 }
+
+// NEW: Log on export for debug (in dev)
+console.debug('API Client exports initialized:', { apiBaseUrl: '/api/v1', hasToken: !!process.env.NODE_ENV === 'development' ? 'hidden' : false })
 
 export const { authorize } = ApiClient
 export const authorizeInWebStore = WebStoreClient.authorize
