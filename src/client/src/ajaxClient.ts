@@ -10,6 +10,11 @@ export const AjaxClient = (baseUrl: string, token?: string) => {
   }
 
   const getConfig = (method, data, cookie) => {
+    // NEW: Validate cookie if provided (prevent null sends)
+    if (cookie && typeof cookie !== 'string') {
+      console.warn('Invalid cookie type in AjaxClient config')
+      cookie = ''
+    }
     const config = {
       credentials: getCredentialsConfig(baseUrl),
       method,
@@ -19,6 +24,9 @@ export const AjaxClient = (baseUrl: string, token?: string) => {
       },
       body: data && JSON.stringify(data),
     }
+
+    // NEW: Log config for debug (no sensitive data)
+    console.debug('AjaxClient config:', { method, hasBody: !!data, hasCookie: !!cookie })
 
     return config
   }
