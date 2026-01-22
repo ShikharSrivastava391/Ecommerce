@@ -15,6 +15,11 @@ const getPaymentFormSettings = options => {
 }
 
 const processOrderPayment = async ({ order, gatewaySettings, settings }) => {
+  // NEW: Null-check secret key (prevent Stripe init fail)
+  if (!gatewaySettings.secret_key) {
+    console.error('Missing Stripe secret key for order', order.id)
+    return false
+  }
   const stripe = new Stripe(gatewaySettings.secret_key, {
     apiVersion: "2022-11-15",
   })
@@ -32,6 +37,9 @@ const processOrderPayment = async ({ order, gatewaySettings, settings }) => {
   })
 
   const paymentSucceeded = intent.status === "succeeded"
+
+  // NEW: Log intent status for audit
+  console.log(`Stripe payment for order ${order.id}: status=${intent.status}, amount=${intent.amount}`)
 
   if (paymentSucceeded)
     await OrdersService.updateOrder(order.id, {

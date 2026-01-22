@@ -15,11 +15,16 @@ const getOptions = orderId => {
       return PaymentGatewaysService.getGateway(
         order.payment_method_gateway
       ).then(gatewaySettings => {
+        // NEW: Validate amount > 0 (prevent zero-charge errors)
+        const amount = Math.max(order.grand_total || 0, 0.01)
+        if (order.grand_total <= 0) {
+          console.warn(`Clamped zero/negative amount for order ${orderId} to 0.01`)
+        }
         const options = {
           gateway: order.payment_method_gateway,
           gatewaySettings: gatewaySettings,
           order: order,
-          amount: order.grand_total,
+          amount: amount,
           currency: settings.currency_code,
         }
 
@@ -40,6 +45,8 @@ const getPaymentFormSettings = async (orderID: string) => {
     case "stripe-elements":
       return StripeElements.getPaymentFormSettings(options)
     default:
+      // NEW: Log invalid gateway for debug
+      console.error(`Invalid gateway: ${options.gateway} for order ${orderID}`)
       return Promise.reject("Invalid gateway")
   }
 }
