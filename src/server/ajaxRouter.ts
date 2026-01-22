@@ -181,8 +181,12 @@ ajaxRouter.post("/reset-password", async ctx => {
 })
 
 ajaxRouter.post("/forgot-password", async ctx => {
-  const filter = {
-    email: ctx.request.body.email.toLowerCase(),
+  // NEW: Sanitize email (lower, trim) for consistency
+  const email = (ctx.request.body.email || '').toLowerCase().trim()
+  if (!email) {
+    ctx.body = { status: false }
+    ctx.status = 400
+    return
   }
   const data = {
     status: true,
@@ -212,7 +216,7 @@ ajaxRouter.post("/forgot-password", async ctx => {
     const settings = SettingsService.getSettings()
 
     await send({
-      to: ctx.request.body.email,
+      to: email,  // Use sanitized
       subject: `${emailTemp.subject} ${settings.store_name}`,
       html: bodyTemplate({
         shop_name: settings.store_name,
@@ -223,7 +227,7 @@ ajaxRouter.post("/forgot-password", async ctx => {
   }
 
   // check if customer exists
-  await api.customers.list(filter).then(async ({ status, json }) => {
+  await api.customers.list({ email }).then(async ({ status, json }) => {  // Use sanitized filter
     if (json.total_count < 1) {
       data.status = false
       ctx.body = data
@@ -232,6 +236,8 @@ ajaxRouter.post("/forgot-password", async ctx => {
     }
     await sendEmail(json.data[0].id)
   })
+  // NEW: Log forgot-password attempt
+  console.log('Forgot-password sent to:', email)
 })
 
 ajaxRouter.post("/customer-account", async ctx => {
@@ -273,6 +279,14 @@ ajaxRouter.post("/customer-account", async ctx => {
 })
 
 ajaxRouter.post("/login", async ctx => {
+  // NEW: Sanitize email/password
+  const email = (ctx.request.body.email || '').toLowerCase().trim()
+  const password = ctx.request.body.password || ''
+  if (!email || !password) {
+    ctx.body = { loggedin_failed: true }
+    ctx.status = 400
+    return
+  }
   const customerData = {
     token: "",
     authenticated: false,
@@ -288,7 +302,7 @@ ajaxRouter.post("/login", async ctx => {
   // check if customer exists in database and grant or denie access
   const result = await db
     .collection("customers")
-    .find({ email: ctx.request.body.email.toLowerCase() })
+    .find({ email })  // Use sanitized
     .limit(1)
     .next()
 
@@ -298,11 +312,13 @@ ajaxRouter.post("/login", async ctx => {
       ctx.body = JSON.stringify(customerData)
       ctx.status = status
     })
+    // NEW: Log failed login attempt
+    console.log('Failed login attempt:', email)
     return
   }
 
   const customerPassword = result.password
-  const inputPassword = ctx.request.body.password
+  const inputPassword = password
 
   const out = await compare(inputPassword, customerPassword)
 
@@ -331,6 +347,8 @@ ajaxRouter.post("/login", async ctx => {
   customerData.loggedin_failed = true
   ctx.body = JSON.stringify(customerData)
   ctx.status = 200
+  // NEW: Log failed login
+  console.log('Invalid password for:', email)
 })
 
 ajaxRouter.post("/register", async ctx => {
