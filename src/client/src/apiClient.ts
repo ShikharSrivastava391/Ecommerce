@@ -13,6 +13,11 @@ export const authorize = (baseUrl, email) => {
 }
 
 export const ApiClient = (baseUrl: string, token?: string) => {
+  // NEW: Null-check token early (prevent downstream errors)
+  if (token === null || token === undefined) {
+    console.warn('ApiClient initialized with null/undefined token')
+    token = ''
+  }
   const client = RestClient(baseUrl, token)
 
   return { ...client, authorize }
