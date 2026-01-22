@@ -14,6 +14,9 @@ class OrderAddressService {
       "billing_address"
     )
 
+    // NEW: Log update for audit
+    console.log(`Updating billing address for order ${id}:`, { keys: Object.keys(data) })
+
     return db
       .collection("orders")
       .updateOne(
@@ -34,6 +37,9 @@ class OrderAddressService {
       data,
       "shipping_address"
     )
+
+    // NEW: Log update
+    console.log(`Updating shipping address for order ${id}:`, { keys: Object.keys(data) })
 
     return db
       .collection("orders")
@@ -58,6 +64,14 @@ class OrderAddressService {
       const value = data[key]
       if (key === "coordinates" || key === "details") {
         address[`${addressTypeName}.${key}`] = value
+      } else if (key === 'email') {
+        // NEW: Validate/sanitize email (lower, trim)
+        const sanitized = (value || '').toLowerCase().trim()
+        if (!sanitized || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitized)) {
+          console.warn(`Invalid email for order ${id}, address ${addressTypeName}:`, value)
+          return  // Skip invalid
+        }
+        address[`${addressTypeName}.${key}`] = sanitized
       } else {
         address[`${addressTypeName}.${key}`] = parse.getString(value)
       }

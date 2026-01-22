@@ -11,6 +11,9 @@ class OrdertDiscountsService {
     let orderObjectID = new ObjectID(order_id)
     const discount = this.getValidDocumentForInsert(data)
 
+    // NEW: Log add
+    console.log(`Adding discount to order ${order_id}:`, { name: discount.name, amount: discount.amount })
+
     return db.collection("orders").updateOne(
       {
         _id: orderObjectID,
@@ -68,11 +71,17 @@ class OrdertDiscountsService {
   }
 
   getValidDocumentForInsert(data) {
-    return {
+    let discount = {
       id: new ObjectID(),
       name: parse.getString(data.name),
       amount: parse.getNumberIfPositive(data.amount),
     }
+
+    // NEW: Clamp amount to min 0.01 (prevent negatives/zeros)
+    discount.amount = Math.max(discount.amount || 0, 0.01)
+    if (discount.amount <= 0) console.warn('Clamped zero discount amount')
+
+    return discount
   }
 
   getValidDocumentForUpdate(data) {
