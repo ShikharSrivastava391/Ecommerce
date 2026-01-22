@@ -16,6 +16,9 @@ class OrderItemsService {
       newItem.variant_id
     )
 
+    // NEW: Log add attempt
+    console.log(`Adding item to order ${order_id}:`, { product: newItem.product_id, quantity: newItem.quantity })
+
     if (orderItem) {
       await this.updateItemQuantityIfAvailable(order_id, orderItem, newItem)
     } else {
@@ -339,6 +342,9 @@ class OrderItemsService {
       variant_id: parse.getObjectIDIfValid(data.variant_id),
       quantity: parse.getNumberIfPositive(data.quantity) || 1,
     }
+
+    // NEW: Clamp quantity to min 1
+    item.quantity = Math.max(item.quantity, 1)
 
     if (data.custom_price) {
       item.custom_price = parse.getNumberIfPositive(data.custom_price)

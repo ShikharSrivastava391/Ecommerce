@@ -22,30 +22,41 @@ const DashboardPage = (): JSX.Element => {
     }
   `)
 
-  if (loading) return "Loading..."
-  if (error) return `Error! ${error.message}`
+  // NEW: Log query for debug (no sensitive)
+  if (loading) {
+    console.log('Dashboard query loading...')
+    return <div aria-label="Loading dashboard data">Loading...</div>
+  }
+  if (error) {
+    console.error('Dashboard query error:', error.message)  // NEW: Log error
+    return <div aria-label="Error loading dashboard">Error! {error.message}</div>
+  }
 
   return (
     <>
-      User ID: {data.user.id}
-      <br />
-      User email: {data.email}
-      <br />
-      Stores
-      <table>
-        <tr>
-          <th>ID</th>
-          <th>Paid Until</th>
-          <th>Domain Names</th>
-        </tr>
-        {data.user.stores.nodes.map(({ id, paidUntil, settings }) => (
-          <tr>
-            <th>{id}</th>
-            <th>{paidUntil}</th>
-            <th>{settings.domainName}</th>
-          </tr>
-        ))}
-      </table>
+      <h1 aria-label="User Info">User ID: {data.user.id}</h1>
+      <p aria-label="User Email">User email: {data.user.email}</p>
+      <section aria-label="Stores Table">
+        <h2>Stores</h2>
+        <table role="table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Paid Until</th>
+              <th>Domain Names</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.user.stores.nodes.map(({ id, paidUntil, settings }) => (
+              <tr key={id} role="row">
+                <td>{id}</td>
+                <td>{paidUntil}</td>
+                <td>{settings.domainName}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
     </>
   )
 }
