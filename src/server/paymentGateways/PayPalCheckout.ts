@@ -67,6 +67,11 @@ const verify = (params, settings) =>
 
     params.cmd = "_notify-validate"
     const body = qs.stringify(params)
+    // NEW: Clamp body len (prevent DoS-like sends)
+    if (body.length > 8192) {
+      console.warn('Clamped oversized PayPal body')
+      body = body.substring(0, 8192)
+    }
 
     // Set up the request to paypal
     let req_options = {
@@ -80,6 +85,8 @@ const verify = (params, settings) =>
       return reject(
         "Received request with test_ipn parameter while sandbox is disabled"
       )
+    // NEW: Log sandbox mode for audit
+    if (params.test_ipn) console.log('PayPal verify in sandbox mode')
 
     let req = https.request(req_options, res => {
       let data = []

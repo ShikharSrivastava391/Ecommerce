@@ -43,6 +43,9 @@ const paymentNotification = async options => {
   const paymentSuccess = data.status === "success"
   const orderId = data.order_id
 
+  // NEW: Log notification details (no sensitive)
+  console.log(`LiqPay notification for order ${orderId}: status=${data.status}, valid=${signatureValid}`)
+
   if (signatureValid && paymentSuccess) {
     await OrdersService.updateOrder(orderId, {
       paid: true,
@@ -63,6 +66,11 @@ const paymentNotification = async options => {
 const getForm = (params, private_key) => {
   params = getFormParams(params)
   let data = new Buffer(JSON.stringify(params)).toString("base64")
+  // NEW: Clamp data len (prevent oversized payloads)
+  if (data.length > 4096) {
+    console.warn('Clamped oversized LiqPay data')
+    data = data.substring(0, 4096)
+  }
   let signature = getHashFromString(private_key + data + private_key)
 
   return {
