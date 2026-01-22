@@ -42,6 +42,13 @@ export const App: FC = () => {
       .catch(console.error)
 
   const updateSettings = () => {
+    // NEW: Validate tags (basic meta format check)
+    const validateTag = (tag: string) => tag.includes('content="') && tag.includes('name=');
+    if (google && !validateTag(google)) { alert("Google tag invalid"); return; }
+    if (bing && !validateTag(bing)) { alert("Bing tag invalid"); return; }
+    if (pinterest && !validateTag(pinterest)) { alert("Pinterest tag invalid"); return; }
+    if (yandex && !validateTag(yandex)) { alert("Yandex tag invalid"); return; }
+
     const metaTags = [google, bing, pinterest, yandex]
       .map(tag => (tag && tag.length > 0 ? tag : null))
       .filter(tag => tag !== null)
@@ -58,6 +65,8 @@ export const App: FC = () => {
       place: "head_start",
       value: metaTags,
     })
+    // NEW: Log update
+    console.log("Updated Site Verify tags:", { googleLen: google.length, bingLen: bing.length, totalTags: metaTags.split('\n').length })
   }
 
   useEffect(() => {

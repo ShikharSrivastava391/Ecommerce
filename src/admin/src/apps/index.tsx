@@ -5,9 +5,13 @@ import * as JivositeApp from "./jivosite"
 import * as SiteVerificationApp from "./siteVerification"
 
 export default [
-  GoogleAnalyticsApp,
-  SiteVerificationApp,
-  JivositeApp,
-  FacebookSDKApp,
+  // NEW: Alpha order for easier maint
   FacebookCustomerChatApp,
+  FacebookSDKApp,
+  GoogleAnalyticsApp,
+  JivositeApp,
+  SiteVerificationApp,
 ]
+
+// NEW: Comment for future apps
+// TODO: Add new apps here alphabetically
