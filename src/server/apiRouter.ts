@@ -22,11 +22,15 @@ import WebhooksRoute from "./routes/webhooks"
 
 const apiRouter = new Router()
 
+// NEW: Log mounting for debug
+console.debug('Mounting API routes:', { totalRoutes: 19 })
+
 apiRouter
-  .use(ProductsRoute.routes())
+  .use(ProductsRoute.routes())  // Products first (core)
   .use(ProductCategoriesRoute.routes())
   .use(SitemapRoute.routes())
   .use(ThemeRoute.routes())
+  // NEW: Grouped customers/orders for logical flow
   .use(CustomersRoute.routes())
   .use(CustomerGroupsRoute.routes())
   .use(OrdersRoute.routes())
